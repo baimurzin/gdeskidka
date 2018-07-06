@@ -1,0 +1,16 @@
+
+
+shell> docker build -t mymysql .
+shell> docker image ls
+shell> docker run --name=mysql1 -d mymysql
+shell> docker ps
+shell> docker logs mysql1
+shell> docker logs mysql1 2>&1 | grep GENERATED
+
+
+shell>  docker exec -it mysql1 mysql -uroot -p
+]EMIBAm0bj4BOkM0rtOnAb%YLef -- pass
+
+
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'newpassword';
+
