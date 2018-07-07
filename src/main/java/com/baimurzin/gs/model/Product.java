@@ -22,10 +22,10 @@ public class Product {
     @Id
     @GeneratedValue
     @Column(name = "product_id")
-    private Integer productId;
+    private Long productId;
 
     private String name;
 
-    @Column(name = "product_category")
+    @ManyToOne(targetEntity = Category.class)
     private Category category;
 }

@@ -22,11 +22,11 @@ public class Category {
     @Id
     @GeneratedValue
     @Column(name = "category_id")
-    private Integer categoryId;
+    private Long categoryId;
 
     private String name;
 
-    @OneToMany(mappedBy = "product_id",  targetEntity = Product.class, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "productId",  targetEntity = Product.class, cascade = CascadeType.ALL)
     private List<Product> products;
 
 

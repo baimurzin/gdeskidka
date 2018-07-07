@@ -21,7 +21,7 @@ public class Location {
     @Id
     @GeneratedValue
     @Column(name = "location_id")
-    private Integer locationId;
+    private Long locationId;
 
 
     @ManyToOne

@@ -7,6 +7,8 @@ shell> docker ps
 shell> docker logs mysql1
 shell> docker logs mysql1 2>&1 | grep GENERATED
 
+ocker-compose rm -v
+ocker-compose up -d
 
 shell>  docker exec -it mysql1 mysql -uroot -p
 ]EMIBAm0bj4BOkM0rtOnAb%YLef -- pass

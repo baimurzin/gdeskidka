@@ -22,7 +22,7 @@ public class Customer {
     @Id
     @GeneratedValue
     @Column(name = "customer_id")
-    private Integer customerId;
+    private Long customerId;
 
     private String email;
 

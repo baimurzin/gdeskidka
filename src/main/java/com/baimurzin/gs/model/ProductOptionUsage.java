@@ -12,12 +12,22 @@ package com.baimurzin.gs.model;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "product_options_usage")
 @Data
 public class ProductOptionUsage {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @ManyToOne(targetEntity = Product.class)
+    private Product product;
+
+    @ManyToOne(targetEntity = ProductOption.class)
+    private ProductOption productOption;
+
 
 }
