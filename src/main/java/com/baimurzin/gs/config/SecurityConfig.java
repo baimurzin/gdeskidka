@@ -40,6 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/resources/**", "/registration").permitAll()
                 .antMatchers("/admin1/**").hasRole("ADMIN")
                 .antMatchers("/company/**").authenticated()
+                .antMatchers("/customer/**").hasRole("CUSTOMER")
                 .antMatchers("/**").anonymous();
 
         http
