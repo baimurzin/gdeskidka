@@ -15,7 +15,10 @@ public class Photo {
     @Id
     @GeneratedValue
     private Long id;
+
     private boolean main;
+
     private String baseUrl;
+
     private String description;
 }

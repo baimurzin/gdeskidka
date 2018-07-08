@@ -28,4 +28,12 @@ public class Product {
 
     @ManyToOne(targetEntity = Category.class)
     private Category category;
+
+    @ManyToOne(targetEntity = Album.class)
+    private Album photos;
+
+    @ManyToOne(targetEntity = Shop.class)
+    private Shop shop;
+
+    //options smth like discount, price, amount, color and so on.
 }

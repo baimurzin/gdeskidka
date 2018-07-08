@@ -25,9 +25,6 @@ public class Customer extends User {
     @Column(name = "shown_name")
     private String shownName;
 
-//    location used in exact shop.
-//    @OneToMany(targetEntity = Location.class, mappedBy = "customer", cascade = CascadeType.ALL)
-//    private List<Location> locations;
-
+    private List<Shop> shops;
 
 }

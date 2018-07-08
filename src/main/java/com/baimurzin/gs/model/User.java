@@ -31,4 +31,7 @@ public class User {
 
     @Column(name = "password")
     private String password;
+
+    @OneToOne(targetEntity = Photo.class)
+    private Photo photo;
 }
