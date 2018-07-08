@@ -1,14 +1,11 @@
 package com.baimurzin.gs.controller;
 
 
-import com.baimurzin.gs.model.User;
-import com.baimurzin.gs.util.SecurityContextUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor

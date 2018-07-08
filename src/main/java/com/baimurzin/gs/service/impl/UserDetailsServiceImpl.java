@@ -1,4 +1,4 @@
-package com.baimurzin.gs.service;
+package com.baimurzin.gs.service.impl;
 
 import com.baimurzin.gs.model.Role;
 import com.baimurzin.gs.model.User;

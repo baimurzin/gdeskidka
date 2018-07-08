@@ -10,29 +10,24 @@
 package com.baimurzin.gs.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "CUSTOMERS")
+@DiscriminatorValue("customer")
 @Data
-public class Customer {
+@EqualsAndHashCode(callSuper = true)
+public class Customer extends User {
 
-    @Id
-    @GeneratedValue
-    @Column(name = "customer_id")
-    private Long customerId;
-
-    private String email;
-
-    private String password;
-
+    //brand
     @Column(name = "shown_name")
     private String shownName;
 
-    @OneToMany(targetEntity = Location.class, mappedBy = "customer", cascade = CascadeType.ALL)
-    private List<Location> locations;
+//    location used in exact shop.
+//    @OneToMany(targetEntity = Location.class, mappedBy = "customer", cascade = CascadeType.ALL)
+//    private List<Location> locations;
 
 
 }

@@ -19,11 +19,9 @@ public class UserDTOToUserMapperFunction implements Function<UserDTO, User> {
 
     @Override
     public User apply(UserDTO userDTO) {
-        String salt = HelperUtil.generateSalt(userDTO.getPassword().length());
         return User.builder()
                 .email(userDTO.getEmail())
                 .password(bCryptPasswordEncoder.encode(userDTO.getPassword()))
-                .salt(salt)
                 .roles(userDTO.getRoles())
                 .build();
     }
