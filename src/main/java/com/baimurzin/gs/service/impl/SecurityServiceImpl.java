@@ -1,5 +1,6 @@
 package com.baimurzin.gs.service.impl;
 
+import com.baimurzin.gs.model.User;
 import com.baimurzin.gs.service.SecurityService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -26,6 +27,8 @@ public class SecurityServiceImpl implements SecurityService {
         Object userDetails = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (userDetails instanceof UserDetails) {
             return ((UserDetails)userDetails).getUsername();
+        } else if (userDetails instanceof User) {
+            return ((User) userDetails).getEmail();
         }
         return null;
     }

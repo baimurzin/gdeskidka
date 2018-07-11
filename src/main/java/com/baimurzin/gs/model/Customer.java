@@ -25,6 +25,7 @@ public class Customer extends User {
     @Column(name = "shown_name")
     private String shownName;
 
+    @OneToMany(targetEntity = Shop.class, mappedBy = "id")
     private List<Shop> shops;
 
 }
