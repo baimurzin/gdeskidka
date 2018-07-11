@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Controller
-@Secured({"CUSTOMER"})
 @RestController
 public class CustomerController extends BaseSecuredController {
 

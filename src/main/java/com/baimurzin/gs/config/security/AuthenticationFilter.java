@@ -1,9 +1,6 @@
-package com.baimurzin.gs.config.stateless;
+package com.baimurzin.gs.config.security;
 
-import com.baimurzin.gs.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
@@ -25,37 +23,44 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
-@Setter
-@Getter
-public class JWTAuthenticationFilter extends GenericFilterBean {
+public class AuthenticationFilter extends GenericFilterBean {
 
-    private final static Logger logger = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
+    private final static Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     public static final String TOKEN_SESSION_KEY = "token";
     public static final String USER_SESSION_KEY = "user";
 
     private AuthenticationManager authenticationManager;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
+    public AuthenticationFilter(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
+    }
 
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        HttpServletRequest request = asHttp(servletRequest);
-        HttpServletResponse response = asHttp(servletResponse);
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletRequest httpRequest = asHttp(request);
+        HttpServletResponse httpResponse = asHttp(response);
 
-        String login = coalesce(request.getHeader("X-Auth-Username"), servletRequest.getParameter("email"));
-        String password = coalesce(request.getHeader("X-Auth-Password"), servletRequest.getParameter("password"));
-        String token = coalesce(request.getHeader("X-Auth-Token"), servletRequest.getParameter("token"));
+        Optional<String> username = Optional.ofNullable(httpRequest.getHeader("X-Auth-Username"));
+        Optional<String> password = Optional.ofNullable(httpRequest.getHeader("X-Auth-Password"));
+        Optional<String> token = Optional.ofNullable(httpRequest.getHeader("X-Auth-Token"));
 
-        String resourcePath = new UrlPathHelper().getPathWithinApplication(request);
+        if (!username.isPresent() || !password.isPresent()) {
+            username = Optional.ofNullable(httpRequest.getParameter("username"));
+            password = Optional.ofNullable(httpRequest.getParameter("password"));
+        }
+
+        String resourcePath = new UrlPathHelper().getPathWithinApplication(httpRequest);
 
         try {
 
-            if (postToAuthenticate(request, resourcePath)) {
-                logger.debug("Trying to authenticate user {} by X-Auth-Username method", login);
-                processUsernamePasswordAuthentication(response, login, password);
+            if (postToAuthenticate(httpRequest, resourcePath)) {
+                logger.debug("Trying to authenticate user {} by X-Auth-Username method", username);
+                processUsernamePasswordAuthentication(httpResponse, username, password);
                 return;
             }
 
@@ -70,8 +75,11 @@ public class JWTAuthenticationFilter extends GenericFilterBean {
         } catch (InternalAuthenticationServiceException internalAuthenticationServiceException) {
             SecurityContextHolder.clearContext();
             logger.error("Internal authentication service exception", internalAuthenticationServiceException);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } finally {
+            httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (AuthenticationException authenticationException) {
+            SecurityContextHolder.clearContext();
+            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, authenticationException.getMessage());
+        }finally {
             MDC.remove(TOKEN_SESSION_KEY);
             MDC.remove(USER_SESSION_KEY);
         }
@@ -97,19 +105,28 @@ public class JWTAuthenticationFilter extends GenericFilterBean {
         return resourcePath.contains("login") && httpRequest.getMethod().equals("POST");
     }
 
-    private void processUsernamePasswordAuthentication(HttpServletResponse httpResponse, String username, String password) throws IOException {
+    private void processUsernamePasswordAuthentication(HttpServletResponse httpResponse, Optional<String> username, Optional<String> password) throws IOException {
         Authentication resultOfAuthentication = tryToAuthenticateWithUsernameAndPassword(username, password);
         SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
         httpResponse.setStatus(HttpServletResponse.SC_OK);
-        User principal = (User) resultOfAuthentication.getPrincipal();
         TokenResponse tokenResponse = new TokenResponse(resultOfAuthentication.getDetails().toString());
         String tokenJsonResponse = new ObjectMapper().writeValueAsString(tokenResponse);
         httpResponse.addHeader("Content-Type", "application/json");
         httpResponse.getWriter().print(tokenJsonResponse);
     }
 
-    private Authentication tryToAuthenticateWithUsernameAndPassword(String username, String password) {
+    private Authentication tryToAuthenticateWithUsernameAndPassword(Optional<String> username, Optional<String> password) {
         UsernamePasswordAuthenticationToken requestAuthentication = new UsernamePasswordAuthenticationToken(username, password);
+        return tryToAuthenticate(requestAuthentication);
+    }
+
+    private void processTokenAuthentication(Optional<String> token) {
+        Authentication resultOfAuthentication = tryToAuthenticateWithToken(token);
+        SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
+    }
+
+    private Authentication tryToAuthenticateWithToken(Optional<String> token) {
+        PreAuthenticatedAuthenticationToken requestAuthentication = new PreAuthenticatedAuthenticationToken(token, null);
         return tryToAuthenticate(requestAuthentication);
     }
 
@@ -120,16 +137,6 @@ public class JWTAuthenticationFilter extends GenericFilterBean {
         }
         logger.debug("User successfully authenticated");
         return responseAuthentication;
-    }
-
-    private void processTokenAuthentication(String token) {
-        Authentication resultOfAuthentication = tryToAuthenticateWithToken(token);
-        SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
-    }
-
-    private Authentication tryToAuthenticateWithToken(String token) {
-        PreAuthenticatedAuthenticationToken requestAuthentication = new PreAuthenticatedAuthenticationToken(token, null);
-        return tryToAuthenticate(requestAuthentication);
     }
 
     private static <T> T coalesce(T... items) {

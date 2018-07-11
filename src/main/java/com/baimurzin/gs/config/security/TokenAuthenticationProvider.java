@@ -1,30 +1,30 @@
-package com.baimurzin.gs.config.stateless;
+package com.baimurzin.gs.config.security;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.stereotype.Service;
 
-@Setter @Getter
+import java.util.Optional;
+
 public class TokenAuthenticationProvider implements AuthenticationProvider {
 
     private TokenService tokenService;
 
+    public TokenAuthenticationProvider(TokenService tokenService) {
+        this.tokenService = tokenService;
+    }
+
     @Override
     public Authentication authenticate(Authentication authentication) {
-        String token = (String) authentication.getPrincipal();
-        if (token == null || token.isEmpty()) {
+        Optional<String> token = (Optional) authentication.getPrincipal();
+        if (!token.isPresent() || token.get().isEmpty()) {
             throw new BadCredentialsException("Invalid token");
         }
-        if (!tokenService.contains(token)) {
+        if (!tokenService.contains(token.get())) {
             throw new BadCredentialsException("Invalid token or token expired");
         }
-        return tokenService.retrieve(token);
+        return tokenService.retrieve(token.get());
     }
 
     @Override

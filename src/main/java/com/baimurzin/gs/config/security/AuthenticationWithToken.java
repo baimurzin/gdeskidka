@@ -1,4 +1,4 @@
-package com.baimurzin.gs.config.stateless;
+package com.baimurzin.gs.config.security;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;

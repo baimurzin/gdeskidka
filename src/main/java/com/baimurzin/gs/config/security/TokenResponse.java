@@ -1,4 +1,4 @@
-package com.baimurzin.gs.config.stateless;
+package com.baimurzin.gs.config.security;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

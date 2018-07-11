@@ -1,4 +1,4 @@
-package com.baimurzin.gs.config.stateless;
+package com.baimurzin.gs.config.security;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 

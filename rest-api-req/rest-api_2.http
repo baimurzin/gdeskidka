@@ -1,4 +1,4 @@
-POST http://localhost:8080/login?email=admin@gmail.com&password=123456
+POST http://localhost:8080/login?username=admin@gmail.com&password=123456
 Accept: */*
 Cache-Control: no-cache
 
@@ -12,4 +12,3 @@ Accept: */*
 Cache-Control: no-cache
 
 ###
-

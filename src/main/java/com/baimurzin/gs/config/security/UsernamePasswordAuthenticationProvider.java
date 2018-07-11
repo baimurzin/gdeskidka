@@ -1,9 +1,8 @@
-package com.baimurzin.gs.config.stateless;
+package com.baimurzin.gs.config.security;
 
 import com.baimurzin.gs.model.Role;
 import com.baimurzin.gs.model.User;
 import com.baimurzin.gs.service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,28 +13,32 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
-@Component("domainAuthProvider")
-@RequiredArgsConstructor
-public class AuthProvider implements AuthenticationProvider {
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+public class UsernamePasswordAuthenticationProvider implements AuthenticationProvider {
+
+    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     private final UserService userService;
     private final TokenService tokenService;
 
+    public UsernamePasswordAuthenticationProvider(UserService userService, TokenService tokenService) {
+        this.userService = userService;
+        this.tokenService = tokenService;
+    }
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        Object passwordObj = authentication.getCredentials();
-        if (passwordObj == null) {
-            passwordObj = "";
+        Optional passwordObj = (Optional) authentication.getCredentials();
+        if (!passwordObj.isPresent()) {
+            passwordObj = Optional.empty();
         }
 
-        String rawPassword = passwordObj.toString();
-        String email = authentication.getName();
+        String rawPassword = (String) passwordObj.get();
+        String email = (String) ((Optional)authentication.getPrincipal()).get();
         if (rawPassword.isEmpty() || email == null || email.isEmpty()) {
             throw new BadCredentialsException("Authentication error.");
         }
