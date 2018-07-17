@@ -17,14 +17,14 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) {
-        Optional<String> token = (Optional) authentication.getPrincipal();
-        if (!token.isPresent() || token.get().isEmpty()) {
+        String token = (String) authentication.getPrincipal();
+        if (token == null || token.isEmpty()) {
             throw new BadCredentialsException("Invalid token");
         }
-        if (!tokenService.contains(token.get())) {
+        if (!tokenService.contains(token)) {
             throw new BadCredentialsException("Invalid token or token expired");
         }
-        return tokenService.retrieve(token.get());
+        return tokenService.retrieve(token);
     }
 
     @Override

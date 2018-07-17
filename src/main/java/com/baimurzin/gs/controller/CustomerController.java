@@ -30,4 +30,9 @@ public class CustomerController extends BaseSecuredController {
         return new ResponseEntity<User>(getLoggedUser(), HttpStatus.OK);
     }
 
+    @RequestMapping("/user/info")
+    public ResponseEntity getUserInfo() {
+        return new ResponseEntity(getLoggedUser(), HttpStatus.OK);
+    }
+
 }

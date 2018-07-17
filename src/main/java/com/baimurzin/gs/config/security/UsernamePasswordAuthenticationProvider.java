@@ -15,7 +15,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 
@@ -32,14 +31,10 @@ public class UsernamePasswordAuthenticationProvider implements AuthenticationPro
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        Optional passwordObj = (Optional) authentication.getCredentials();
-        if (!passwordObj.isPresent()) {
-            passwordObj = Optional.empty();
-        }
+        String passwordObj = (String) authentication.getCredentials();
 
-        String rawPassword = (String) passwordObj.get();
-        String email = (String) ((Optional)authentication.getPrincipal()).get();
-        if (rawPassword.isEmpty() || email == null || email.isEmpty()) {
+        String email = (String) authentication.getPrincipal();
+        if (passwordObj.isEmpty() || email == null || email.isEmpty()) {
             throw new BadCredentialsException("Authentication error.");
         }
 
@@ -48,7 +43,7 @@ public class UsernamePasswordAuthenticationProvider implements AuthenticationPro
             throw new UsernameNotFoundException("User Not Found");
         }
 
-        if (bCryptPasswordEncoder.matches(rawPassword, user.getPassword())) {
+        if (bCryptPasswordEncoder.matches(passwordObj, user.getPassword())) {
             String newToken = tokenService.generateNewToken();
 
             Set<GrantedAuthority> grantedAuthorities = new HashSet<>();

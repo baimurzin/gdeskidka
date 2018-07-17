@@ -64,8 +64,8 @@ public class AuthenticationFilter extends GenericFilterBean {
                 return;
             }
 
-            if (token != null) {
-                logger.debug("Trying to authenticate user by X-Auth-Token method. Token: {}", token);
+            if (token.isPresent()) {
+                logger.debug("Trying to authenticate user by X-Auth-Token method. Token: {}", token.get());
                 processTokenAuthentication(token);
             }
 
@@ -116,7 +116,7 @@ public class AuthenticationFilter extends GenericFilterBean {
     }
 
     private Authentication tryToAuthenticateWithUsernameAndPassword(Optional<String> username, Optional<String> password) {
-        UsernamePasswordAuthenticationToken requestAuthentication = new UsernamePasswordAuthenticationToken(username, password);
+        UsernamePasswordAuthenticationToken requestAuthentication = new UsernamePasswordAuthenticationToken(username.get(), password.get());
         return tryToAuthenticate(requestAuthentication);
     }
 
@@ -126,7 +126,7 @@ public class AuthenticationFilter extends GenericFilterBean {
     }
 
     private Authentication tryToAuthenticateWithToken(Optional<String> token) {
-        PreAuthenticatedAuthenticationToken requestAuthentication = new PreAuthenticatedAuthenticationToken(token, null);
+        PreAuthenticatedAuthenticationToken requestAuthentication = new PreAuthenticatedAuthenticationToken(token.get(), null);
         return tryToAuthenticate(requestAuthentication);
     }
 
