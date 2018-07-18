@@ -73,6 +73,19 @@ export const constantRouterMap = [
   },
 
   {
+    path: '/shops',
+    component: Layout,
+    children: [
+      {
+        path: 'show',
+        name: 'Shops',
+        component: () => import('@/views/shops/index'),
+        meta: { title: 'Shops' }
+      }
+    ]
+  },
+
+  {
     path: '/nested',
     component: Layout,
     redirect: '/nested/menu1',
