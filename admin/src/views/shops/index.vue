@@ -4,50 +4,88 @@
 
       <!--As a button to create new shop -->
       <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-        <div class='card-panel' @click="dialogTableVisible = true">
+        <div class='card-panel' style="height: 180px;" @click="dialogTableVisible = true">
           <div class="card-panel-icon-wrapper icon-people">
             <svg-icon icon-class="plus" class-name="card-panel-icon" />
           </div>
           <div class="card-panel-description">
-            <div class="card-panel-text">Add new shop</div>
-            <count-to class="card-panel-num" :startVal="0" :endVal="102400" :duration="260"></count-to>
+            <div class="card-panel-text">Add shop</div>
+            <count-to class="card-panel-num" :startVal="0" :endVal="102400" :duration="2600"></count-to>
           </div>
         </div>
       </el-col>
 
 
     </el-row>
-    <el-dialog v-el-drag-dialog  title="Add new shop" :visible.sync="dialogTableVisible">
-      <el-form autoComplete="on" :model="shopForm" label-position="left">
-        <switch-shop-button v-model="shopForm.shopType"/>
 
-        <el-form-item prop="name">
-          <el-input :span="6" :offset="5" label="Shop name:" placeholder="Shop name" v-model="shopForm.name" type="text" clearable size="small"/>
+    <el-row class="panel-group" :gutter="40">
+
+      <!--As a button to create new shop -->
+      <router-link v-for="shop in shops" :key="shop.id" :item="shop" :to="{ name: 'Shop', params: {id: shop.id} }">
+        <el-col  :xs="12" :sm="12" :lg="6" class="card-panel-col">
+          <div class='card-panel'>
+            <div class="card-panel-icon-wrapper icon-people">
+              <svg-icon icon-class="plus" class-name="card-panel-icon" />
+            </div>
+            <div class="card-panel-description">
+              <div class="card-panel-text">{{shop.name}}</div>
+              <count-to class="card-panel-num" :startVal="0" :endVal="102400" :duration="260"></count-to>
+            </div>
+          </div>
+        </el-col>
+      </router-link>
+
+
+    </el-row>
+
+    <el-dialog v-el-drag-dialog  title="Add new shop" :visible.sync="dialogTableVisible">
+      <el-form autoComplete="on" :model="shopForm" :ref="shopForm" label-position="left">
+
+        <!--<switch-shop-button :model="shopForm.shopType"/>-->
+
+
+        <el-form-item prop="type">
+          <div>
+            Shop type:
+            <el-radio-group v-model="shopForm.shopType">
+              <el-radio-button label="Online"></el-radio-button>
+              <el-radio-button label="Offline"></el-radio-button>
+            </el-radio-group>
+          </div>
         </el-form-item>
 
-        <el-upload
-          class="upload-demo"
-          drag
-          action="https://jsonplaceholder.typicode.com/posts/"
-          :file-list="shopForm.photo"
-          :limit="1"
-          :on-exceed="handleExceed"
-          multiple>
-          <i class="el-icon-upload"></i>
-          <div class="el-upload__text">Drop file here or <em>click to upload</em></div>
-          <div class="el-upload__tip" slot="tip">jpg/png files with a size less than 500kb</div>
-        </el-upload>
+        <el-form-item label="Shop name" prop="name">
+          <el-input :ref="shopForm.name" :span="6" :offset="5" label="Shop name:" placeholder="Shop name" v-model="shopForm.name" type="text" clearable size="small"/>
+        </el-form-item>
 
-        <el-form-item v-if="shopForm.shopType === 'Online'" prop="address">
-          <el-input placeholder="Please input" v-model="shopForm.address">
+        <el-form-item prop="name" label="Shop photo">
+          <el-upload
+            class="upload-demo"
+            drag
+            :action="apiUrl + '/storage/uploadFile'"
+            :file-list="shopForm.photos"
+            :limit="1"
+            :on-exceed="handleExceed"
+            :on-success="handleSuccess"
+            >
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">Drop file here or <em>click to upload</em></div>
+            <!--<div class="el-upload__tip" slot="tip">jpg/png files with a size less than 500kb</div>-->
+          </el-upload>
+        </el-form-item>
+
+
+
+        <el-form-item label="Shop address" v-if="shopForm.shopType === 'Online'" prop="address">
+          <el-input placeholder="Shop url" v-model="shopForm.address">
             <template slot="prepend">Http://</template>
           </el-input>
         </el-form-item>
-        <el-form-item v-else prop="address">
-          <el-input :span="6" :offset="5" label="Shop name:" placeholder="Shop url" v-model="shopForm.name" type="text" clearable size="small"/>
+        <el-form-item label="Shop address" v-else prop="address">
+          <el-input :span="6" :offset="5" label="Shop name:" placeholder="Shop url" v-model="shopForm.address" type="text" clearable size="small"/>
         </el-form-item>
 
-        <el-button type="success">Success</el-button>
+        <el-button :loading="loading" @click.native.prevent="createShop" type="success">Create</el-button>
       </el-form>
     </el-dialog>
   </div>
@@ -58,6 +96,7 @@
   import elDragDialog from '@/directive/el-dragDialog' // base on element-ui
   import SwitchShopButton from './components/SwitchShopType'
   import { Message } from 'element-ui'
+  import { mapGetters } from 'vuex'
 
   export default {
     name: 'shops',
@@ -68,14 +107,22 @@
     },
     data() {
       return {
+        apiUrl: process.env.BASE_API,
+        loading: false,
         dialogTableVisible: false,
         shopForm: {
           shopType: 'Online',
           name: '',
-          photo: [],
-          address: ''
+          photos: [],
+          address: '',
+          photo: ''
         }
       }
+    },
+    computed: {
+      ...mapGetters([
+        'shops'
+      ])
     },
     methods: {
       handleExceed(file, fileList) {
@@ -84,7 +131,29 @@
           type: 'error',
           duration: 5 * 1000
         })
+      },
+      handleSuccess(resp, file, fileList) {
+        this.shopForm.photo = resp
+      },
+      createShop() {
+        console.log('before create api shop', this.shopForm)
+        this.$store.dispatch('CreateShop', this.shopForm).then(() => {
+          this.loading = false
+          this.dialogTableVisible = false
+        }).catch(() => {
+          this.loading = false
+          console.log('bad')
+        })
       }
+    },
+    created() {
+      this.$store.dispatch('GetShops').then(() => {
+        this.loading = false
+        this.dialogTableVisible = false
+      }).catch(() => {
+        this.loading = false
+        console.log('bad')
+      })
     }
   }
 </script>

@@ -16,9 +16,11 @@ public class CORSFilter extends OncePerRequestFilter {
         //  response.addHeader("Access-Control-Allow-Origin", "ttp://logaclhost:5435,http://localhost:25435");
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
+        response.setHeader("Access-Control-Expose-Headers", "Access-Control-*");
+        response.setHeader("Allow", "POST, GET, OPTIONS, DELETE, PUT");
 //        response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Headers", "*, Origin, X-Requested-With, Content-Type, Accept, token, Access-Control-Request-Headers, " +
-                "Access-Control-Request-Method, DNT, Host, Origin, Connection, ");
+        response.setHeader("Access-Control-Allow-Headers", "*, Access-Control-*, Origin, X-Requested-With, Content-Type, Accept, token, Access-Control-Request-Headers, " +
+                "Access-Control-Request-Method, DNT, Host, Origin, Connection ");
         filterChain.doFilter(request, response);
     }
 

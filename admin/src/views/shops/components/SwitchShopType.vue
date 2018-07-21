@@ -9,11 +9,7 @@
 </template>
 
 <script>
-export default {
-  data: () => {
-    return {
-      type: 'Offline'
-    }
+  export default {
+
   }
-}
 </script>

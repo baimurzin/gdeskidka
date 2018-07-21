@@ -23,8 +23,8 @@ public class Shop {
 
     private String name;
 
-    @OneToMany(targetEntity = Address.class, cascade = CascadeType.ALL)
-    private List<Address> addresses;
+    @OneToOne(targetEntity = Address.class)
+    private Address address;
 
     @OneToOne(targetEntity = Photo.class)
     private Photo photo;

@@ -10,6 +10,8 @@ import javax.persistence.Entity;
 @DiscriminatorValue("offline")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class OfflineShop extends Shop {
+public class OfflineAddress extends Address {
+
+    private String address;
 
 }

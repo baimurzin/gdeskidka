@@ -2,21 +2,22 @@ package com.baimurzin.gs.controller;
 
 import com.baimurzin.gs.service.S3Service;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/storage/")
 public class BucketController {
 
-    private final S3Service amazonClient;
+    @Autowired
+    private S3Service amazonClient;
 
     @PostMapping("/uploadFile")
     public ResponseEntity uploadFile(@RequestPart(value = "file") MultipartFile file) {
-        return new ResponseEntity<String>(this.amazonClient.uploadFile(file), HttpStatus.CREATED);
+        return ResponseEntity.ok(this.amazonClient.uploadFile(file));
     }
 
     @DeleteMapping("/deleteFile")

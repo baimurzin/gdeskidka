@@ -1,13 +1,14 @@
 package com.baimurzin.gs.controller;
 
 
+import com.baimurzin.gs.dto.ShopDTO;
+import com.baimurzin.gs.factory.ShopFactory;
 import com.baimurzin.gs.model.Shop;
 import com.baimurzin.gs.service.SecurityService;
 import com.baimurzin.gs.service.ShopService;
 import com.baimurzin.gs.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -16,21 +17,30 @@ import org.springframework.web.bind.annotation.*;
 public class ShopController extends BaseSecuredController{
 
     private final ShopService service;
+    private ShopFactory shopFactory;
 
     @Autowired
     public ShopController(SecurityService securityService,
                           UserService userService,
-                          ShopService service) {
+                          ShopService service,
+                          ShopFactory shopFactory) {
         super(securityService, userService);
         this.service = service;
+        this.shopFactory = shopFactory;
+    }
+
+    @RequestMapping(value = "/", method = RequestMethod.OPTIONS)
+    public ResponseEntity options() {
+        return ResponseEntity.ok().build();
     }
 
 
     @PostMapping
-    public ResponseEntity create(@RequestBody Shop shop) {
-        if(shop == null) {
+    public ResponseEntity create(@RequestBody ShopDTO shopForm) {
+        if(shopForm == null) {
             return ResponseEntity.badRequest().build();
         }
+        Shop shop = shopFactory.createShop(shopForm);
         return ResponseEntity.ok(service.create(shop));
     }
 

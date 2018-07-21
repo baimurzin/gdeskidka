@@ -1,8 +1,6 @@
 package com.baimurzin.gs.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -11,6 +9,10 @@ import javax.persistence.*;
 @RequiredArgsConstructor
 @Data
 @EqualsAndHashCode
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="type",discriminatorType=DiscriminatorType.STRING)
+@DiscriminatorValue(value="address")
+@AllArgsConstructor
 public class Address {
 
     @Id

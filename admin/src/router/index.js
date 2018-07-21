@@ -77,10 +77,27 @@ export const constantRouterMap = [
     component: Layout,
     children: [
       {
-        path: 'show',
+        path: '',
         name: 'Shops',
         component: () => import('@/views/shops/index'),
         meta: { title: 'Shops' }
+      }
+    ]
+  },
+
+  {
+    path: '/shop/:id',
+    component: () => Layout,
+    meta: { title: 'Shop', hidden: true },
+    children: [
+      {
+        path: '',
+        name: 'Shop',
+        component: () => import('@/views/shops/shop/index'),
+        meta: {
+          hidden: true,
+          title: 'Shop'
+        }
       }
     ]
   },
