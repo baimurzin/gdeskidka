@@ -1,6 +1,7 @@
 package com.baimurzin.gs.mapper;
 
 import com.baimurzin.gs.dto.UserDTO;
+import com.baimurzin.gs.model.Customer;
 import com.baimurzin.gs.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,10 +17,12 @@ public class UserDTOToUserMapperFunction implements Function<UserDTO, User> {
 
     @Override
     public User apply(UserDTO userDTO) {
-        return User.builder()
-                .email(userDTO.getEmail())
-                .password(bCryptPasswordEncoder.encode(userDTO.getPassword()))
-                .roles(userDTO.getRoles())
-                .build();
+        //remove hard code manually created user. User Factory with different type of users.
+        Customer customer = new Customer();
+        customer.setEmail(userDTO.getEmail());
+        customer.setShownName(userDTO.getCompanyName());
+        customer.setPassword(bCryptPasswordEncoder.encode(userDTO.getPassword()));
+        customer.setRoles(userDTO.getRoles());
+        return customer;
     }
 }

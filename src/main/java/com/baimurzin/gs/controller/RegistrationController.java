@@ -8,12 +8,16 @@ import com.baimurzin.gs.service.SecurityService;
 import com.baimurzin.gs.service.UserService;
 import com.baimurzin.gs.validator.UserDTOValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -39,11 +43,16 @@ public class RegistrationController {
 
 
     @RequestMapping(value = "/registration", method = RequestMethod.POST)
-    public String registration(@ModelAttribute("userForm") UserDTO userForm, BindingResult bindingResult, ModelMap model) {
-        userValidator.validate(userForm, bindingResult);
+    public @ResponseBody
+    ResponseEntity registration(@ModelAttribute("userForm") UserDTO userForm, ModelMap model) {
+//        userValidator.validate(userForm, bindingResult);
 
-        if (bindingResult.hasErrors()) {
-            return "registration";
+        if (isExist(userForm)) {
+            throw new BadCredentialsException("User with such email already exists ");
+        }
+        if (!isPasswordEquals(userForm)) {
+//            return new ResponseEntity<>("Password confirmation and Password must match ",HttpStatus.BAD_REQUEST);
+            throw new BadCredentialsException("Passwords not matches");
         }
 
         Set<Role> roleSet = new HashSet<>();
@@ -52,10 +61,15 @@ public class RegistrationController {
         roleSet.add(roleService.save(role));
 
         userForm.setRoles(roleSet);
-        userService.create(userForm);
+        User user = userService.create(userForm);
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
+    }
 
-        securityService.autoLogin(userForm.getEmail(), userForm.getPasswordConfirm());
+    private boolean isExist(UserDTO userRegistrationForm) {
+        return userService.findByEmail(userRegistrationForm.getEmail()) != null;
+    }
 
-        return "redirect:/";
+    private boolean isPasswordEquals(UserDTO userRegistrationForm) {
+        return userRegistrationForm.getPassword().equals(userRegistrationForm.getPasswordConfirm());
     }
 }

@@ -1,0 +1,63 @@
+POST http://localhost:8080/registration?email=admin@gmail.com&password=123456&passwordConfirm=123456&companyName=vlad
+Accept: */*
+Cache-Control: no-cache
+
+###
+
+POST http://localhost:8080/login?username=admin@gmail.com&password=123456
+Accept: */*
+Cache-Control: no-cache
+
+<> 2018-07-08T095432.200.json
+<> 2018-07-08T095410.200.json
+
+###
+
+POST http://localhost:8080/shop
+Accept: */*
+Cache-Control: no-cache
+X-Auth-Token: 27571b85-88a9-4113-b355-e99e1505857c
+Content-Type: application/json
+
+{
+  "name": "test"
+}
+
+###
+
+GET http://localhost:8080/shop?id=3
+Accept: */*
+Cache-Control: no-cache
+X-Auth-Token: b4fc3807-766e-4ea4-b6d8-37183f2bfaf0
+Content-Type: application/json
+
+###
+
+GET http://localhost:8080/shop
+Accept: */*
+Cache-Control: no-cache
+X-Auth-Token: 4bea40cc-4922-44bc-b798-619b533262cf
+Content-Type: application/json
+
+###
+
+PUT http://localhost:8080/shop?id=3
+Accept: */*
+Cache-Control: no-cache
+X-Auth-Token: b4fc3807-766e-4ea4-b6d8-37183f2bfaf0
+Content-Type: application/json
+
+{
+  "id": 3,
+"name":"test"
+}
+
+###
+
+DELETE http://localhost:8080/shop/3
+Accept: */*
+Cache-Control: no-cache
+X-Auth-Token: 27571b85-88a9-4113-b355-e99e1505857c
+Content-Type: application/json
+
+###

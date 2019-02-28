@@ -4,7 +4,7 @@
         <h2 class="form-heading">Log in</h2>
 
         <div class="form-group ${error???then('has-error','')}">
-            <span>${message!}</span>
+            <span>${errorMessage!}</span>
             <input name="username" type="text" class="form-control" placeholder="email"
                    autofocus="true"/>
             <input name="password" type="password" class="form-control" placeholder="Password"/>

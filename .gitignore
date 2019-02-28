@@ -11,7 +11,7 @@
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea
+.idea/*
 *.iws
 *.iml
 *.ipr
@@ -34,6 +34,8 @@
 .idea/**/tasks.xml
 .idea/**/dictionaries
 .idea/**/shelf
+
+node_modules
 
 # Sensitive or high-churn files
 .idea/**/dataSources/

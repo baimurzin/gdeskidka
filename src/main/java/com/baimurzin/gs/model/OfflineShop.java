@@ -11,4 +11,5 @@ import javax.persistence.Entity;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class OfflineShop extends Shop {
+
 }

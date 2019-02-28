@@ -1,71 +1,105 @@
 package com.baimurzin.gs.config;
 
+import com.baimurzin.gs.config.filter.CORSFilter;
+import com.baimurzin.gs.config.security.AuthenticationFilter;
+import com.baimurzin.gs.config.security.TokenAuthenticationProvider;
+import com.baimurzin.gs.config.security.TokenService;
+import com.baimurzin.gs.config.security.UsernamePasswordAuthenticationProvider;
+import com.baimurzin.gs.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.BeanIds;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.util.Assert;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import javax.servlet.http.HttpServletResponse;
 
 
 @Configuration
 @EnableWebSecurity
+@EnableScheduling
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final UserDetailsService userDetailsService;
+
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public void configure(WebSecurity web) throws Exception {
         web
                 .ignoring()
-                .antMatchers("/resources/**");
+                .antMatchers("/resources/**", "/registration");
     }
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable();
-
-        http.exceptionHandling().accessDeniedPage("/forbidden");
-
-        http.authorizeRequests()
-                .antMatchers("/resources/**", "/registration").permitAll()
-                .antMatchers("/admin1/**").hasRole("ADMIN")
-                .antMatchers("/company/**").authenticated()
-                .antMatchers("/customer/**").hasRole("CUSTOMER")
-                .antMatchers("/**").anonymous();
-
         http
-            .formLogin()
-                .loginPage("/login")
-                .permitAll()
+                .csrf().disable()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-            .logout()
-                .permitAll();
+                .authorizeRequests()
+                .antMatchers("/company/**").hasRole("CUSTOMER")
+                .antMatchers("/customer/**").hasRole("ADMIN")
+                .antMatchers("/*").permitAll()
+                .and()
+                .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());
+
+        http.addFilterBefore(new AuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class)
+                .addFilterBefore(new CORSFilter(), ChannelProcessingFilter.class);
+//                addFilterBefore(new ManagementEndpointAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class);
     }
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        Assert.notNull(userDetailsService, "UserDetailsService must not be null");
-        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
-    }
-
-    @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(usernamePasswordAuthenticationProvider()).
+                authenticationProvider(tokenAuthenticationProvider());
     }
+
+    @Bean
+    public AuthenticationProvider usernamePasswordAuthenticationProvider() {
+        return new UsernamePasswordAuthenticationProvider(userService, tokenService());
+    }
+
+    @Bean
+    public TokenService tokenService() {
+        return new TokenService();
+    }
+
+    @Bean
+    public AuthenticationProvider tokenAuthenticationProvider() {
+        return new TokenAuthenticationProvider(tokenService());
+    }
+
+    @Bean
+    public AuthenticationEntryPoint unauthorizedEntryPoint() {
+        return (request, response, authException) -> response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Unauthorized");
+    }
+
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
 }
